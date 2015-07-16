@@ -1,24 +1,33 @@
-//
-//  ViewController.swift
-//  BWWalkthroughExample
-//
-//  Created by Yari D'areglia on 17/09/14.
-//  Copyright (c) 2014 Yari D'areglia. All rights reserved.
-//
-
 import UIKit
 
 extension ViewController: BWWalkthroughViewControllerDelegate {
     
-    // MARK: - Walkthrough delegate -
+    // MARK: - Walkthrough delegate
+    
+    func walkthroughPrevButtonPressed() {
+        if walkthrough.currentPage < 2 {
+            return
+        }
+        
+        walkthrough.loadAtIndex(walkthrough.currentPage - 2, vc: vcs[walkthrough.currentPage - 2])
+    }
+    
+    func walkthroughNextButtonPressed() {
+        if walkthrough.currentPage + 2 >= walkthrough.numberOfPages {
+            return
+        }
+        walkthrough.loadAtIndex(walkthrough.currentPage + 2, vc: vcs[walkthrough.currentPage + 2])
+    }
     
     func walkthroughPageDidChange(pageNumber: Int) {
-        println("Current Page \(pageNumber)")
+        println("Current Page: \(pageNumber)")
     }
     
     func walkthroughCloseButtonPressed() {
         self.dismissViewControllerAnimated(true, completion: nil)
     }
+    
+    
 }
 
 class ViewController: UIViewController {
@@ -28,7 +37,11 @@ class ViewController: UIViewController {
     let numberOfViewControllers = 10
     
     var vcs = [UIViewController]()
-    var walkthrough: BWWalkthroughViewController!
+    var walkthrough: BWWalkthroughViewController! {
+        didSet {
+            walkthrough.numberOfPages = numberOfViewControllers
+        }
+    }
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -36,16 +49,22 @@ class ViewController: UIViewController {
         walkthrough.delegate = self
     }
     
+    func loadVisiblePages() {
+        walkthrough.loadAtIndex(0, vc: vcs[0])
+        walkthrough.loadAtIndex(1, vc: vcs[1])
+        walkthrough.loadAtIndex(2, vc: vcs[2])
+    }
+    
     @IBAction func showWalkthrough(){
         for idx in 0..<numberOfViewControllers {
             vcs.append(stb.instantiateViewControllerWithIdentifier(pattern + "\(idx)") as! UIViewController)
         }
         
-        for idx in 1..<numberOfViewControllers {
-            walkthrough.addViewController(vcs[idx])
+        for _ in 0..<numberOfViewControllers {
+            walkthrough.controllers.append(nil)
         }
-        walkthrough.addViewController(vcs[0])
         
+        loadVisiblePages()
         self.presentViewController(walkthrough, animated: true, completion: nil)
     }
     
