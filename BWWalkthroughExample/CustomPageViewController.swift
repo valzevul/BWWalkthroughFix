@@ -8,7 +8,7 @@
 
 import UIKit
 
-class CustomPageViewController: UIViewController,BWWalkthroughPage {
+class CustomPageViewController: UIViewController, BWWalkthroughPage {
 
     @IBOutlet var imageView:UIImageView?
     @IBOutlet var titleLabel:UILabel?
@@ -18,6 +18,10 @@ class CustomPageViewController: UIViewController,BWWalkthroughPage {
         super.viewDidLoad()
     }
 
+    override func viewDidDisappear(animated: Bool) { // Dealloc memory
+        println("Delete redundant view")
+    }
+    
     // MARK: BWWalkThroughPage protocol
     
     func walkthroughDidScroll(position: CGFloat, offset: CGFloat) {

@@ -10,7 +10,7 @@ import UIKit
 }
 
 @objc protocol BWWalkthroughPage{
-    @objc func walkthroughDidScroll(position:CGFloat, offset:CGFloat)   // Called when the main Scrollview...scrolls
+    @objc func walkthroughDidScroll(position:CGFloat, offset:CGFloat)
 }
 
 
@@ -18,26 +18,25 @@ import UIKit
     
     // MARK: - Public properties -
     
-    weak var delegate:BWWalkthroughViewControllerDelegate?
-    @IBOutlet var pageControl:UIPageControl?
-    @IBOutlet var nextButton:UIButton?
-    @IBOutlet var prevButton:UIButton?
-    @IBOutlet var closeButton:UIButton?
+    weak var delegate: BWWalkthroughViewControllerDelegate?
+    @IBOutlet var pageControl: UIPageControl?
+    @IBOutlet var nextButton: UIButton?
+    @IBOutlet var prevButton: UIButton?
+    @IBOutlet var closeButton: UIButton?
     
-    
-    var currentPage: Int{
+    var currentPage: Int {
         get {
             let page = Int((scrollview.contentOffset.x / view.bounds.size.width))
             return page
         }
     }
-    
+
     
     // MARK: - Private properties -
     internal var numberOfPages: Int = 0
-    private let scrollview:UIScrollView!
-    internal var controllers:[UIViewController?] = []
-    private var lastViewConstraint:NSArray?
+    private let scrollview: UIScrollView!
+    internal var controllers: [UIViewController?] = []
+    private var lastViewConstraint: NSArray?
     
     
     // MARK: - Overrides -
@@ -52,7 +51,7 @@ import UIKit
         super.init(coder: aDecoder)
     }
     
-    override init(nibName nibNameOrNil: String?, bundle nibBundleOrNil: NSBundle?){
+    override init(nibName nibNameOrNil: String?, bundle nibBundleOrNil: NSBundle?) {
         scrollview = UIScrollView()
         controllers = Array()
         super.init(nibName: nibNameOrNil, bundle: nibBundleOrNil)
@@ -60,16 +59,11 @@ import UIKit
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        
-        // Initialize UIScrollView
-        
+
         scrollview.delegate = self
         scrollview.setTranslatesAutoresizingMaskIntoConstraints(false)
         
-        view.insertSubview(scrollview, atIndex: 0) //scrollview is inserted as first view of the hierarchy
-        
-        // Set scrollview related constraints
-        
+        view.insertSubview(scrollview, atIndex: 0)
         view.addConstraints(NSLayoutConstraint.constraintsWithVisualFormat("V:|-0-[scrollview]-0-|", options:nil, metrics: nil, views: ["scrollview":scrollview]))
         view.addConstraints(NSLayoutConstraint.constraintsWithVisualFormat("H:|-0-[scrollview]-0-|", options:nil, metrics: nil, views: ["scrollview":scrollview]))
         
@@ -99,7 +93,6 @@ import UIKit
     @IBAction func prevPage(){
         
         if currentPage > 0 {
-            
             delegate?.walkthroughPrevButtonPressed?()
             
             var frame = scrollview.frame
@@ -112,39 +105,25 @@ import UIKit
         delegate?.walkthroughCloseButtonPressed?()
     }
 
-    func insertVC(vcn: UIViewController?, idx: Int) {
+    func insertVC(vcn: UIViewController?, idx: Int) { // New method to move VCs
         if let vc = vcn {
-            controllers[idx] = vc
-            vc.view.setTranslatesAutoresizingMaskIntoConstraints(false)
+            controllers[idx] = vc // Choose position
             scrollview.addSubview(vc.view)
-            let metricDict = ["w":vc.view.bounds.size.width,"h":vc.view.bounds.size.height]
-            vc.view.addConstraints(NSLayoutConstraint.constraintsWithVisualFormat("V:[view(h)]", options:nil, metrics: metricDict, views: ["view":vc.view]))
-            vc.view.addConstraints(NSLayoutConstraint.constraintsWithVisualFormat("H:[view(w)]", options:nil, metrics: metricDict, views: ["view":vc.view]))
-            scrollview.addConstraints(NSLayoutConstraint.constraintsWithVisualFormat("V:|-0-[view]|", options:nil, metrics: nil, views: ["view":vc.view,]))
-            if idx == 0 {
-                scrollview.addConstraints(NSLayoutConstraint.constraintsWithVisualFormat("H:|-0-[view]", options:nil, metrics: nil, views: ["view":vc.view,]))
-            } else {
-                let previousVC = controllers[idx >= 2 ? idx - 2 : 0]
-                if let previousView = previousVC?.view {
-                    scrollview.addConstraints(NSLayoutConstraint.constraintsWithVisualFormat("H:[previousView]-0-[view]", options:nil, metrics: nil, views: ["previousView":previousView,"view":vc.view]))
-                    
-                    if let cst = lastViewConstraint {
-                        scrollview.removeConstraints(cst as [AnyObject])
-                    }
-                    lastViewConstraint = NSLayoutConstraint.constraintsWithVisualFormat("H:[view]-0-|", options:nil, metrics: nil, views: ["view":vc.view])
-                    scrollview.addConstraints(lastViewConstraint! as [AnyObject])
-                }
-            }
             
+            let bounds = self.view.bounds // Create bounds instead of constraints
+            vc.view.frame = CGRectMake(CGFloat(idx) * bounds.width, 0, bounds.width, bounds.height)
+            vc.view.setTranslatesAutoresizingMaskIntoConstraints(true)
+            vc.view.autoresizingMask = UIViewAutoresizing.allZeros // Resize
+            
+            scrollview.contentSize = CGSizeMake(CGFloat(controllers.count) * bounds.width, bounds.height)
         }
-
     }
     
-    func addViewController(vcn: UIViewController?) {
+    func addViewController(vcn: UIViewController?) { // For compatability with old versions
         insertVC(vcn, idx: controllers.count)
     }
     
-    func loadAtIndex(idx: Int, vc: UIViewController) {
+    func loadAtIndex(idx: Int, vc: UIViewController) { // To update the screen
         insertVC(vc, idx: idx)
         updateUI()
     }
@@ -153,15 +132,16 @@ import UIKit
     private func updateUI(){
         pageControl?.currentPage = currentPage
         delegate?.walkthroughPageDidChange?(currentPage)
-        if currentPage == controllers.count - 1{
+        
+        if currentPage == controllers.count - 1 {
             nextButton?.hidden = true
-        }else{
+        } else {
             nextButton?.hidden = false
         }
         
-        if currentPage == 0{
+        if currentPage == 0 {
             prevButton?.hidden = true
-        }else{
+        } else {
             prevButton?.hidden = false
         }
     }
@@ -169,7 +149,7 @@ import UIKit
     // MARK: - Scrollview Delegate -
     
     func scrollViewDidScroll(sv: UIScrollView) {
-        for var i=0; i < controllers.count; i++ {
+        for var i = 0; i < controllers.count; i++ {
             if let vc = controllers[i] as? BWWalkthroughPage{
                 let mx = ((scrollview.contentOffset.x + view.bounds.size.width) - (view.bounds.size.width * CGFloat(i))) / view.bounds.size.width
                 if (mx < 2 && mx > -2.0) {

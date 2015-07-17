@@ -10,6 +10,13 @@ extension ViewController: BWWalkthroughViewControllerDelegate {
         }
         
         walkthrough.loadAtIndex(walkthrough.currentPage - 2, vc: vcs[walkthrough.currentPage - 2])
+        
+        if walkthrough.currentPage + 2 >= walkthrough.numberOfPages {
+            return
+        }
+        
+        walkthrough.controllers[walkthrough.currentPage + 2]?.view.removeFromSuperview()
+        walkthrough.controllers[walkthrough.currentPage + 2] = nil
     }
     
     func walkthroughNextButtonPressed() {
@@ -17,10 +24,13 @@ extension ViewController: BWWalkthroughViewControllerDelegate {
             return
         }
         walkthrough.loadAtIndex(walkthrough.currentPage + 2, vc: vcs[walkthrough.currentPage + 2])
-    }
-    
-    func walkthroughPageDidChange(pageNumber: Int) {
-        println("Current Page: \(pageNumber)")
+        
+        if walkthrough.currentPage < 2 {
+            return
+        }
+        
+        walkthrough.controllers[walkthrough.currentPage - 2]?.view.removeFromSuperview()
+        walkthrough.controllers[walkthrough.currentPage - 2] = nil
     }
     
     func walkthroughCloseButtonPressed() {
@@ -34,7 +44,7 @@ class ViewController: UIViewController {
     
     let stb = UIStoryboard(name: "Walkthrough", bundle: nil)
     let pattern = "walk"
-    let numberOfViewControllers = 10
+    let numberOfViewControllers = 15
     
     var vcs = [UIViewController]()
     var walkthrough: BWWalkthroughViewController! {
@@ -56,6 +66,9 @@ class ViewController: UIViewController {
     }
     
     @IBAction func showWalkthrough(){
+        vcs = []
+        walkthrough.controllers = []
+        
         for idx in 0..<numberOfViewControllers {
             vcs.append(stb.instantiateViewControllerWithIdentifier(pattern + "\(idx)") as! UIViewController)
         }
