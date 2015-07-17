@@ -10,12 +10,16 @@ import UIKit
 
 class CustomPageViewController: UIViewController, BWWalkthroughPage {
 
-    @IBOutlet var imageView:UIImageView?
-    @IBOutlet var titleLabel:UILabel?
-    @IBOutlet var textLabel:UILabel?
+    @IBOutlet weak var imageView:UIImageView?
+    @IBOutlet weak var titleLabel:UILabel?
+    @IBOutlet weak var textLabel:UILabel?
     
     override func viewDidLoad() {
         super.viewDidLoad()
+    }
+    
+    deinit {
+        println("Deinit")
     }
 
     override func viewDidDisappear(animated: Bool) { // Dealloc memory
@@ -32,7 +36,7 @@ class CustomPageViewController: UIViewController, BWWalkthroughPage {
         textLabel?.layer.transform = CATransform3DRotate(tr, CGFloat(M_PI) * (1.0 - offset), 1, 1, 1)
         
         var tmpOffset = offset
-        if(tmpOffset > 1.0){
+        if (tmpOffset > 1.0) {
             tmpOffset = 1.0 + (1.0 - tmpOffset)
         }
         imageView?.layer.transform = CATransform3DTranslate(tr, 0 , (1.0 - tmpOffset) * 200, 0)

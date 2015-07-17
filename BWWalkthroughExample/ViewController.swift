@@ -9,7 +9,7 @@ extension ViewController: BWWalkthroughViewControllerDelegate {
             return
         }
         
-        walkthrough.loadAtIndex(walkthrough.currentPage - 2, vc: vcs[walkthrough.currentPage - 2])
+        walkthrough.loadAtIndex(walkthrough.currentPage - 2, vc: instantiateVC(walkthrough.currentPage - 2))
         
         if walkthrough.currentPage + 2 >= walkthrough.numberOfPages {
             return
@@ -23,7 +23,7 @@ extension ViewController: BWWalkthroughViewControllerDelegate {
         if walkthrough.currentPage + 2 >= walkthrough.numberOfPages {
             return
         }
-        walkthrough.loadAtIndex(walkthrough.currentPage + 2, vc: vcs[walkthrough.currentPage + 2])
+        walkthrough.loadAtIndex(walkthrough.currentPage + 2, vc: instantiateVC(walkthrough.currentPage + 2))
         
         if walkthrough.currentPage < 2 {
             return
@@ -46,7 +46,6 @@ class ViewController: UIViewController {
     let pattern = "walk"
     let numberOfViewControllers = 15
     
-    var vcs = [UIViewController]()
     var walkthrough: BWWalkthroughViewController! {
         didSet {
             walkthrough.numberOfPages = numberOfViewControllers
@@ -60,18 +59,17 @@ class ViewController: UIViewController {
     }
     
     func loadVisiblePages() {
-        walkthrough.loadAtIndex(0, vc: vcs[0])
-        walkthrough.loadAtIndex(1, vc: vcs[1])
-        walkthrough.loadAtIndex(2, vc: vcs[2])
+        walkthrough.loadAtIndex(0, vc: instantiateVC(0))
+        walkthrough.loadAtIndex(1, vc: instantiateVC(1))
+        walkthrough.loadAtIndex(2, vc: instantiateVC(2))
+    }
+    
+    func instantiateVC(idx: Int) -> UIViewController {
+        return stb.instantiateViewControllerWithIdentifier(pattern + "\(idx)") as! UIViewController
     }
     
     @IBAction func showWalkthrough(){
-        vcs = []
         walkthrough.controllers = []
-        
-        for idx in 0..<numberOfViewControllers {
-            vcs.append(stb.instantiateViewControllerWithIdentifier(pattern + "\(idx)") as! UIViewController)
-        }
         
         for _ in 0..<numberOfViewControllers {
             walkthrough.controllers.append(nil)
