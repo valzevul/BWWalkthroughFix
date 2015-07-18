@@ -152,6 +152,12 @@ import UIKit
         for var i = 0; i < controllers.count; i++ {
             if let vc = controllers[i] as? BWWalkthroughPage{
                 let mx = ((scrollview.contentOffset.x + view.bounds.size.width) - (view.bounds.size.width * CGFloat(i))) / view.bounds.size.width
+                if (mx > 0) {
+                    delegate?.walkthroughNextButtonPressed?()
+                }
+                if (mx < 0) {
+                    delegate?.walkthroughPrevButtonPressed?()
+                }
                 if (mx < 2 && mx > -2.0) {
                     vc.walkthroughDidScroll(scrollview.contentOffset.x, offset: mx)
                 }
